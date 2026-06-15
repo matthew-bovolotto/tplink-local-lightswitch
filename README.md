@@ -49,7 +49,24 @@ lights = ["192.168.0.11", "192.168.0.12"]
 | `lights`        | per `[[server]]` | IP addresses of the lights to toggle.                 |
 | `poll_interval` | per `[[server]]` | Optional per-group override of the default interval.  |
 
-## Usage
+## Running as a service (recommended)
+
+This tool is designed to run continuously as a **systemd service**. First
+complete [Setup](#setup) so the virtualenv exists, then install it with the
+helper in the `services/` folder:
+
+```bash
+sudo services/install.bash
+```
+
+This installs the unit, copies `config.toml` to a root-owned location
+(`/etc/tplink-manager/config.toml`), and enables + starts the service running
+as the installing user. See [`services/`](services/) for details.
+
+## Running a local copy (development)
+
+To run a local copy directly — for development or a quick try-out — use
+`startup.bash` (this does **not** install a service):
 
 ```bash
 ./startup.bash                 # uses config.toml in the current directory
