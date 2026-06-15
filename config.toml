@@ -1,0 +1,15 @@
+# Seconds to wait between switch state checks. Can be overridden per server.
+poll_interval = 2.0
+
+# Each [[server]] is an independent group: one switch and the lights it
+# controls. When the switch toggles, the group's lights are toggled together.
+# Add more [[server]] blocks to monitor additional groups concurrently.
+[[server]]
+name = "group-1"
+switch = "192.168.0.10"
+lights = ["192.168.0.11", "192.168.0.12"]
+
+#[[server]]
+#name = "group-2"
+#switch = "192.168.0.20"
+#lights = ["192.168.0.21"]

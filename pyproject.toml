@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tplink-manager"
+version = "0.1.0"
+description = "Monitor TP-Link/Kasa switches and toggle their associated lights."
+requires-python = ">=3.11"
+dependencies = [
+    "python-kasa>=0.10,<0.11",
+]
+
+[project.scripts]
+tplink-manager = "TPlinkManager:run_cli"
+
+[tool.setuptools]
+py-modules = ["TPlinkManager"]
+
+[tool.setuptools.package-dir]
+"" = "src"
