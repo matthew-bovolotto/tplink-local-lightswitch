@@ -1,0 +1,22 @@
+[Unit]
+Description=tplink light switch manager
+# Wait for the network to actually be up — device discovery needs it.
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=matthew
+WorkingDirectory=/home/matthew/git/tplink-py
+ExecStart=/home/matthew/git/tplink-py/venv/bin/python3 -u src/TPlinkManager.py -c /etc/tplink-manager/config.toml
+Restart=always
+RestartSec=10
+
+# Light hardening (kept permissive so LAN device discovery keeps working).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
