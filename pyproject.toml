@@ -11,8 +11,18 @@ dependencies = [
     "python-kasa>=0.10,<0.11",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+]
+
 [project.scripts]
 tplink-manager = "TPlinkManager:run_cli"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
 
 [tool.setuptools]
 py-modules = ["TPlinkManager"]
