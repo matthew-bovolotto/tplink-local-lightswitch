@@ -75,6 +75,31 @@ test_preserves_existing_config() {
         "existing config should not be overwritten"
 }
 
+# --- Run-user substitution -------------------------------------------------
+
+test_substitutes_default_run_user() {
+    run_install >/dev/null 2>&1
+    local user
+    user="$(id -un)"
+    assert "grep -q '^User=${user}$' '${SYSTEMD_DIR}/${UNIT_NAME}'" \
+        "unit should run as the invoking user by default"
+    assert_fail "grep -q '__RUN_USER__' '${SYSTEMD_DIR}/${UNIT_NAME}'" \
+        "placeholder should not remain in the installed unit"
+}
+
+test_respects_run_user_override() {
+    export RUN_USER="root"
+    run_install >/dev/null 2>&1
+    assert "grep -q '^User=root$' '${SYSTEMD_DIR}/${UNIT_NAME}'" \
+        "RUN_USER override should be honored"
+}
+
+test_fails_for_nonexistent_run_user() {
+    export RUN_USER="no-such-user-zzz"
+    assert_fail "run_install >/dev/null 2>&1" "should reject a missing user"
+    assert "[ ! -f '${SYSTEMD_DIR}/${UNIT_NAME}' ]" "nothing should be installed"
+}
+
 # --- Failure paths ---------------------------------------------------------
 
 test_fails_when_systemctl_missing() {

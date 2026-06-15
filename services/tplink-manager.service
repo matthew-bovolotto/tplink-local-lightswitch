@@ -7,7 +7,9 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-User=matthew
+# __RUN_USER__ is substituted with the target user by services/install.bash
+# (defaults to the user invoking the installer).
+User=__RUN_USER__
 WorkingDirectory=/home/matthew/git/tplink-py
 ExecStart=/home/matthew/git/tplink-py/venv/bin/python3 -u src/TPlinkManager.py -c /etc/tplink-manager/config.toml
 Restart=always

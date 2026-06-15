@@ -20,6 +20,10 @@ SYSTEMD_DIR="${SYSTEMD_DIR:-/etc/systemd/system}"
 CONFIG_DIR="${CONFIG_DIR:-/etc/tplink-manager}"
 SYSTEMCTL="${SYSTEMCTL:-systemctl}"
 
+# User the service runs as. Defaults to the user invoking the installer
+# (SUDO_USER when run via sudo), and can be overridden with RUN_USER.
+RUN_USER="${RUN_USER:-${SUDO_USER:-$(id -un)}}"
+
 UNIT_DEST="${SYSTEMD_DIR}/${UNIT_NAME}"
 CONFIG_SRC="${REPO_DIR}/config.toml"
 CONFIG_DEST="${CONFIG_DIR}/config.toml"
@@ -53,6 +57,12 @@ if [[ ! -f "${CONFIG_SRC}" ]]; then
     exit 1
 fi
 
+# 2b. The target run-user must exist.
+if ! id "${RUN_USER}" >/dev/null 2>&1; then
+    echo "Error: target user '${RUN_USER}' does not exist." >&2
+    exit 1
+fi
+
 # 3. We need permission to write to both install locations.
 if ! can_write_into "${SYSTEMD_DIR}" || ! can_write_into "${CONFIG_DIR}"; then
     echo "Error: insufficient permissions to write to ${SYSTEMD_DIR} and/or ${CONFIG_DIR}." >&2
@@ -76,8 +86,9 @@ else
     install -m 0644 "${CONFIG_SRC}" "${CONFIG_DEST}"
 fi
 
-echo "Installing ${UNIT_NAME} -> ${UNIT_DEST}"
-install -m 0644 "${UNIT_SRC}" "${UNIT_DEST}"
+echo "Installing ${UNIT_NAME} -> ${UNIT_DEST} (User=${RUN_USER})"
+sed "s|__RUN_USER__|${RUN_USER}|g" "${UNIT_SRC}" \
+    | install -m 0644 /dev/stdin "${UNIT_DEST}"
 
 echo "Reloading systemd unit files..."
 "${SYSTEMCTL}" daemon-reload
