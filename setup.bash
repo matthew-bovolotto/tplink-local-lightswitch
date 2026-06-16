@@ -4,6 +4,13 @@
 #
 #   ./setup.bash
 #
+# Run this as a command, not with `source`/`.`: it uses `set -e` and `exit`,
+# which would terminate the caller's shell if sourced.
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    echo "Run setup.bash as a command:  ./setup.bash   (do not 'source' it)." >&2
+    return 1
+fi
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
