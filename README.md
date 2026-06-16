@@ -30,13 +30,13 @@ independent group: one switch and the lights it controls.
 poll_interval = 2.0
 
 [[server]]
-name = "bedroom"
+name = "group-1"
 switch = "192.168.0.10"
 lights = ["192.168.0.11", "192.168.0.12"]
 
 # Add more groups to monitor them concurrently:
 # [[server]]
-# name = "living-room"
+# name = "group-2"
 # switch = "192.168.0.20"
 # lights = ["192.168.0.21"]
 ```
