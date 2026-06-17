@@ -75,19 +75,28 @@ fi
 
 # --- Install ---------------------------------------------------------------
 
-# Install the config into a root-owned, write-protected location. Existing
-# config is preserved so re-running the installer doesn't clobber edits.
+# Install the config into a root-owned, write-protected location.
 echo "Installing config -> ${CONFIG_DEST}"
 install -d -m 0755 "${CONFIG_DIR}"
 if [[ -f "${CONFIG_DEST}" ]]; then
-    echo "  ${CONFIG_DEST} already exists; leaving it untouched."
+    if ! diff -q "${CONFIG_SRC}" "${CONFIG_DEST}" >/dev/null 2>&1; then
+        echo "  ${CONFIG_DEST} differs from the project config."
+        read -rp "  Overwrite with the newer project config? [y/N] " answer
+        if [[ "${answer}" =~ ^[Yy]$ ]]; then
+            install -m 0644 "${CONFIG_SRC}" "${CONFIG_DEST}"
+            echo "  Config updated."
+        else
+            echo "  Keeping existing config."
+        fi
+    else
+        echo "  ${CONFIG_DEST} is already up to date."
+    fi
 else
-    # 0644: world-readable but only root can modify (write-protected).
     install -m 0644 "${CONFIG_SRC}" "${CONFIG_DEST}"
 fi
 
 echo "Installing ${UNIT_NAME} -> ${UNIT_DEST} (User=${RUN_USER})"
-sed "s|__RUN_USER__|${RUN_USER}|g" "${UNIT_SRC}" \
+sed -e "s|__RUN_USER__|${RUN_USER}|g" -e "s|__REPO_DIR__|${REPO_DIR}|g" "${UNIT_SRC}" \
     | install -m 0644 /dev/stdin "${UNIT_DEST}"
 
 echo "Reloading systemd unit files..."
@@ -97,6 +106,15 @@ echo "Enabling and starting ${UNIT_NAME}..."
 "${SYSTEMCTL}" enable --now "${UNIT_NAME}"
 
 echo
-echo "Done. Useful commands:"
-echo "  ${SYSTEMCTL} status ${UNIT_NAME}"
-echo "  journalctl -u ${UNIT_NAME} -f"
+echo "Waiting 5 seconds for service to start..."
+sleep 5
+
+if "${SYSTEMCTL}" is-active --quiet "${UNIT_NAME}"; then
+    echo "Service is running."
+else
+    echo "Service failed to start."
+    "${SYSTEMCTL}" status "${UNIT_NAME}" --no-pager || true
+    echo
+    echo "Check logs with:  journalctl -u ${UNIT_NAME} -f"
+    exit 1
+fi

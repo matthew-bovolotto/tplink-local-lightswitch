@@ -23,6 +23,17 @@ if ! command -v "${PYTHON}" >/dev/null 2>&1; then
     exit 1
 fi
 
+PYTHON_VERSION="$("${PYTHON}" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+if [[ "$(printf '%s\n' "3.11" "${PYTHON_VERSION}" | sort -V | head -n1)" != "3.11" ]]; then
+    echo "Error: Python 3.11+ is required (found ${PYTHON_VERSION})." >&2
+    exit 1
+fi
+
+if ! "${PYTHON}" -m pip --version >/dev/null 2>&1; then
+    echo "Error: pip is not installed for ${PYTHON}. Install it first (e.g. apt install python3-pip)." >&2
+    exit 1
+fi
+
 if [[ ! -d "${VENV_DIR}" ]]; then
     echo "Creating virtualenv at ${VENV_DIR}"
     "${PYTHON}" -m venv "${VENV_DIR}"
